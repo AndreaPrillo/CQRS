@@ -22,6 +22,7 @@ stop:
 clean: stop
 	@echo "Deleting the Project's state..."
 	@rm -rf .docker-data	
+	@rm -rf .docker-data/hasura-db
 
 reset: stop clean start
 

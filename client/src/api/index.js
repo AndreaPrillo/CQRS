@@ -1,7 +1,9 @@
+import { cmdTypes } from '../constants';
+
 const axios = require('axios').default;
 const BASE_URL = "http://localhost:8080/v1/graphql";
 const ADMIN_SECRET = 'hasura'
-const USER_ID = 'Gianni'
+const USER_ID = 'Andrea'
 
 export const fetchTodos = () => {
 	return axios({
@@ -54,6 +56,35 @@ export const addTodo = (title) => {
 	});
 }
 
+// export const updateTodo = (data) => {
+// 	const {id, title} = data
+// 	return axios({
+// 		url: BASE_URL,
+// 		method: "POST",
+// 		headers: {
+// 			"x-hasura-admin-secret": ADMIN_SECRET
+// 		},
+// 		data: {
+// 			variables: {
+// 				id,
+// 				title
+// 			},
+// 			query: `
+// 			mutation updateTodo($id: bigint!, $title: String!) {
+// 				update_todos_by_pk(
+// 				  pk_columns: {id: $id}
+// 				  _set: {title: $title}
+// 				){
+// 				  id
+// 				  title
+// 				}
+// 			  }
+// 			`
+// 		}
+// 	});
+// }
+
+
 export const updateTodo = (data) => {
 	const {id, title} = data
 	return axios({
@@ -65,22 +96,29 @@ export const updateTodo = (data) => {
 		data: {
 			variables: {
 				id,
-				title
+				title,
+				user_id: USER_ID
 			},
 			query: `
-			mutation updateTodo($id: bigint!, $title: String!) {
-				update_todos_by_pk(
-				  pk_columns: {id: $id}
-				  _set: {title: $title}
-				){
-				  id
-				  title
+			mutation insertCommand($id: bigint!, $title: String!, $user_id: String!){
+				insert_commands(objects:[{
+					  cmd_type: "${cmdTypes.UPDATE}",
+					  item_id: $id,
+					  payload: {id: $id, title: $title},
+					  cmd_ref: $user_id
+					}]) {
+					affected_rows
+					returning {
+					  cmd_id
+					  payload
+					}
 				}
-			  }
+			}
 			`
 		}
 	});
 }
+
 
 export const deleteTodo = (id) => {
 	return axios({
